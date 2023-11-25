@@ -9,7 +9,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+  main:
+    allow-circular-references: true
 
 jwt:
-  lifetime: 30m
+  lifetime: 10m
   secret: y9a8-u05j1kjahpsdiugf3479345dgajyx2357
+

@@ -1,7 +1,7 @@
 package com.adziri.springweb.services;
 
+import com.adziri.springweb.dto.RegistrationUserDTO;
 import com.adziri.springweb.entities.User;
-import com.adziri.springweb.repositories.RoleRepository;
 import com.adziri.springweb.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -10,19 +10,21 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
-import java.beans.Transient;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     public Optional<User> findByUsername(String username){
         return userRepository.findUserByUsername(username);
@@ -46,9 +48,13 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public void createNewUser(User user){
-        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
-        userRepository.save(user);
+    public User createNewUser(RegistrationUserDTO userDTO){
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setUsername(userDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRoles(List.of(roleService.getUserRole()));
+        return userRepository.save(user);
     }
 }
 
